@@ -1,17 +1,20 @@
 import json
-import os
+import logging
 from pathlib import Path
 import re
 from typing import Set
 from pyproj import Geod
 import requests
+from tqdm import tqdm
 
 from models.step import Step
 from models.trip import Trip
+import config
 
 DATA_SOURCE = "https://raw.githubusercontent.com/djaiss/mapsicon/master/all/{country_code}/vector.svg"
 FILL_COLOR = "#4b5a6c"
-COUNTRY_BOUNDING_BOXES_PATH = "data/country_bounding_boxes.json"
+COUNTRY_BOUNDING_BOXES_PATH = config.DATA_PATH / "country_bounding_boxes.json"
+logger = logging.getLogger(__name__)
 
 
 class MapManager:
@@ -24,7 +27,7 @@ class MapManager:
         bounding_box = self.country_bounding_boxes.get(step.country_code.lower())
 
         if not bounding_box:
-            print(f"ℹ️ No country bounding box data found for step '{step.name}'")
+            logger.info(f"No country bounding box data found for step '{step.name}'")
             return (0, 0)
 
         sw = bounding_box["sw"]
@@ -55,29 +58,26 @@ class MapManager:
         return lat_percentage, lon_percentage
 
     def update_style(self, maps_path: Path):
-        for filename in os.listdir(maps_path):
-            if filename.endswith(".svg"):
-                file_path = maps_path.joinpath(filename)
+        for file_path in maps_path.glob("*.svg"):
+            # Read the content of the SVG file
+            with open(file_path, "r") as file:
+                content = file.read()
 
-                # Read the content of the SVG file
-                with open(file_path, "r") as file:
-                    content = file.read()
+            # Use regex to replace fill="#000000" with the new FILL_COLOR
+            updated_content = re.sub(
+                r'fill="#000000"', f'fill="{FILL_COLOR}"', content
+            )
 
-                # Use regex to replace fill="#000000" with the new FILL_COLOR
-                updated_content = re.sub(
-                    r'fill="#000000"', f'fill="{FILL_COLOR}"', content
-                )
-
-                # Write the updated content back to the file
-                with open(file_path, "w") as file:
-                    file.write(updated_content)
+            # Write the updated content back to the file
+            with open(file_path, "w") as file:
+                file.write(updated_content)
 
     def download_maps_from_trip(self, trip: Trip, output_path: Path):
         output_path.mkdir(parents=True, exist_ok=True)
 
         downloaded_countries: Set[str] = set()
 
-        for step in trip.steps:
+        for step in tqdm(trip.steps, desc="Downloading maps"):
             if step.country_code in downloaded_countries:
                 continue
 
@@ -95,4 +95,4 @@ class MapManager:
                 downloaded_countries.add(step.country_code)
 
             except requests.exceptions.RequestException:
-                print(f"ℹ️ Failed to download map for step '{step.name}'")
+                logger.warning(f"Failed to download map for step '{step.name}'")

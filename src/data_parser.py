@@ -1,17 +1,20 @@
-import os
 import json
+import logging
 from pathlib import Path
 
 from arguments_manager import ArgumentManager
 from models.step import Step
 from models.trip import Trip
 
+logger = logging.getLogger(__name__)
+
 
 class DataParser:
     def load(self, data_path: Path) -> Trip:
         file_path = data_path.joinpath("trip.json")
 
-        if not os.path.exists(file_path):
+        if not file_path.exists():
+            logger.error(f"The file {file_path} does not exist.")
             raise FileNotFoundError(f"The file {file_path} does not exist.")
 
         with open(file_path, "r") as file:

@@ -1,8 +1,10 @@
 import json
-import os
+import logging
 from pathlib import Path
 import shutil
 from typing import List
+from tqdm import tqdm
+
 from models.photo import Photo
 from models.trip import Trip
 
@@ -10,6 +12,7 @@ from models.trip import Trip
 PHOTOS_BY_PAGES_FILE_NAME = "photos_by_pages.txt"
 PHOTOS_MAPPING_FILE_NAME = "photos_mapping.json"
 COVER_PHOTO_TEXT_IN_FILE = "Cover photo: "
+logger = logging.getLogger(__name__)
 
 
 class PhotoManager:
@@ -55,8 +58,8 @@ class PhotoManager:
                 return json.load(f)
 
         except FileNotFoundError:
-            print(
-                f"ℹ️ No file named '{PHOTOS_MAPPING_FILE_NAME}' found. Continuing with default photos by pages."
+            logger.info(
+                f"No file named '{PHOTOS_MAPPING_FILE_NAME}' found. Continuing with default photos by pages."
             )
 
     def get_photos_by_pages_from_file(self, trip: Trip, save_path: Path):
@@ -67,8 +70,8 @@ class PhotoManager:
             ) as f:
                 return f.read().splitlines()
         except FileNotFoundError:
-            print(
-                f"ℹ️ No file named '{PHOTOS_BY_PAGES_FILE_NAME}' found. Continuing with default photos by pages."
+            logger.info(
+                f"No file named '{PHOTOS_BY_PAGES_FILE_NAME}' found. Continuing with default photos by pages."
             )
 
     def load_photos_pages(self, trip: Trip, save_path: Path):
@@ -88,8 +91,8 @@ class PhotoManager:
                     + 1
                 )
             except ValueError:
-                print(
-                    f"ℹ️ Step '{step.get_name_for_photos_by_pages_export()}' is present in PolarSteps export but not in '{PHOTOS_BY_PAGES_FILE_NAME}' file. Using default layout..."
+                logger.warning(
+                    f"Step '{step.get_name_for_photos_by_pages_export()}' is present in PolarSteps export but not in '{PHOTOS_BY_PAGES_FILE_NAME}' file. Using default layout..."
                 )
                 step.compute_default_photos_by_pages()
                 continue
@@ -125,8 +128,8 @@ class PhotoManager:
                 photos_not_in_pages.remove(step.cover_photo)
 
             if photos_not_in_pages:
-                print(
-                    f"ℹ️ A photo is present in the PolarSteps export but not in '{PHOTOS_BY_PAGES_FILE_NAME}' file. Using default layout for the step '{step.get_name_for_photos_by_pages_export()}'..."
+                logger.warning(
+                    f"A photo is present in the PolarSteps export but not in '{PHOTOS_BY_PAGES_FILE_NAME}' file. Using default layout for the step '{step.get_name_for_photos_by_pages_export()}'..."
                 )
                 step.compute_default_photos_by_pages()
 
@@ -135,18 +138,20 @@ class PhotoManager:
     ):
         output_path_for_photos.mkdir(parents=True, exist_ok=True)
 
-        for step in trip.steps:
+        for step in tqdm(trip.steps, desc="Processing steps photos"):
             photo_directory = data_path.joinpath(step.get_photo_directory_name())
-            if os.path.exists(photo_directory):
+            if photo_directory.exists():
                 index = 1
-                for photo_filename in os.listdir(photo_directory):
-                    photo_path = photo_directory.joinpath(photo_filename)
-                    destination_path = output_path_for_photos.joinpath(photo_filename)
-                    shutil.copy(photo_path, destination_path)
-                    photo = Photo(
-                        id=photo_filename,
-                        index=index,
-                        path=destination_path,
-                    )
-                    step.photos.append(photo)
-                    index += 1
+                # Sort files to ensure consistent indexing
+                photo_files = sorted(list(photo_directory.iterdir()))
+                for photo_path in photo_files:
+                    if photo_path.is_file():
+                        destination_path = output_path_for_photos.joinpath(photo_path.name)
+                        shutil.copy(photo_path, destination_path)
+                        photo = Photo(
+                            id=photo_path.name,
+                            index=index,
+                            path=destination_path,
+                        )
+                        step.photos.append(photo)
+                        index += 1

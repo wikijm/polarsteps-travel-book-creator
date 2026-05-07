@@ -1,7 +1,7 @@
 :root {
-  --theme-color: rgb(71, 174, 162);
-  --theme-secondary: rgb(0, 46, 61);
-  --dark-1: rgb(0, 46, 61);
+  --theme-color: #47aea2;
+  --theme-secondary: #002e3d;
+  --dark-1: #002e3d;
   --grey-9: #4b5a6c;
   --grey-15: #8a99ad;
   --grey-19: #b7c0cd;
@@ -11,6 +11,9 @@
   --full-to-relative: 0.35;
   --country-shape-size: 348px;
   --bar-height: calc(12px * var(--full-to-relative));
+  
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 html {
@@ -18,21 +21,27 @@ html {
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
-  font-variation-settings: "wdth" 100;
+  -webkit-font-smoothing: antialiased;
 }
 
-html, body {
+body {
   margin: 0;
   padding: 0;
+  background-color: #fcfcfc;
 }
 
 .text-content {
-  padding: calc(150px * var(--full-to-relative));
+  padding: calc(120px * var(--full-to-relative));
 }
 
 .step-with-photo {
   display: flex;
   height: calc(100vh - 40px);
+  background: white;
+  box-shadow: var(--shadow-md);
+  margin: 20px;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .step-with-photo > div {
@@ -42,48 +51,42 @@ html, body {
 
 .step-days {
   position: relative;
-  margin-top: calc(50px * var(--full-to-relative));
-}
-
-.step-days-bar,
-.step-days-bar-fill {
-  height: var(--bar-height);
-  border-radius: calc(var(--bar-height) / 2);
+  margin-top: calc(40px * var(--full-to-relative));
 }
 
 .step-days-bar {
+  height: var(--bar-height);
+  border-radius: calc(var(--bar-height) / 2);
   background: var(--grey-23);
+  overflow: hidden;
 }
 
 .step-days-bar-fill {
-  position: absolute;
-  top: 0;
-  left: 0;
-  background: var(--theme-color);
+  height: 100%;
+  background: linear-gradient(90deg, var(--theme-color), #5cc3b5);
 }
 
 .step-days-popup {
   position: absolute;
-  top: calc(-110px * var(--full-to-relative));
+  top: calc(-100px * var(--full-to-relative));
   display: flex;
   align-items: center;
   justify-content: center;
-  width: calc(204px * var(--full-to-relative));
-  height: calc(78px * var(--full-to-relative));
-  font-family: "BrandonGrotesque";
-  font-weight: 500;
-  font-size: calc(40px * var(--full-to-relative));
+  width: calc(180px * var(--full-to-relative));
+  height: calc(70px * var(--full-to-relative));
+  font-family: "Outfit", sans-serif;
+  font-weight: 600;
+  font-size: calc(36px * var(--full-to-relative));
   color: white;
-  line-height: calc(40px * var(--full-to-relative));
-  text-transform: uppercase;
   background-color: var(--theme-color);
-  border-radius: calc(8px * var(--full-to-relative));
+  border-radius: calc(6px * var(--full-to-relative));
   transform: translateX(-50%);
+  box-shadow: var(--shadow-sm);
 }
 
 .step-days-popup-arrow {
-  --arrow-height: calc(15px * var(--full-to-relative));
-  --arrow-width: calc(40px * var(--full-to-relative));
+  --arrow-height: calc(12px * var(--full-to-relative));
+  --arrow-width: calc(30px * var(--full-to-relative));
   position: absolute;
   width: var(--arrow-width);
   height: var(--arrow-height);
@@ -93,12 +96,6 @@ html, body {
   display: flex;
 }
 
-.step-days-popup-arrow svg {
-  object-fit: contain;
-  height: 100%;
-  width: 100%;
-}
-
 .step-days-popup-arrow svg path {
   fill: var(--theme-color);
 }
@@ -106,15 +103,15 @@ html, body {
 .step-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
 }
 
 .step-map {
   height: calc(var(--country-shape-size) * var(--full-to-relative));
   position: relative;
-  margin-top: calc(50px * var(--full-to-relative));
-  margin-left: 10px;
+  margin-top: calc(40px * var(--full-to-relative));
+  filter: drop-shadow(var(--shadow-sm));
 }
 
 .step-map img {
@@ -122,92 +119,87 @@ html, body {
 }
 
 .step-map-dot {
-  --dot-size: calc(60px * var(--full-to-relative));
+  --dot-size: calc(50px * var(--full-to-relative));
   position: absolute;
   width: var(--dot-size);
   height: var(--dot-size);
   transform: translate(-50%, -50%);
-  display: flex;
+  z-index: 10;
 }
 
 .step-map-dot svg {
   height: 100%;
   width: 100%;
-  object-fit: contain;
-  object-position: center;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
 }
 
 .step-country {
-  margin-top: calc(69px * var(--full-to-relative));
+  margin-top: calc(60px * var(--full-to-relative));
   display: flex;
-  flex-direction: row;
   align-items: center;
-  gap: 10px;
-}
-
-.step-country-flag {
-  position: relative;
-  top: -2px;
+  gap: 12px;
 }
 
 .step-country-name {
-  font-family: "BrandonGrotesque";
-  font-weight: 500;
+  font-family: "Outfit", sans-serif;
+  font-weight: 700;
   color: var(--dark-1);
-  font-size: calc(69px * var(--full-to-relative));
-  line-height: calc(80px * var(--full-to-relative));
+  font-size: calc(50px * var(--full-to-relative));
   text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 .step-title {
-  font-family: "BrandonGrotesque";
-  font-weight: 500;
+  font-family: "Outfit", sans-serif;
+  font-weight: 800;
   color: var(--dark-1);
-  font-size: calc(100px * var(--full-to-relative));
+  font-size: calc(90px * var(--full-to-relative));
   text-transform: uppercase;
-  line-height: calc(100px * var(--full-to-relative));
-  hyphens: manual;
-  overflow-wrap: break-word;
-  text-align: left;
-  text-align: start;
-  margin-top: 8px;
+  line-height: 1.1;
+  margin-top: 12px;
+  letter-spacing: -0.02em;
 }
 
 .step-stats {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  margin-top: calc(100px * var(--full-to-relative));
-  font-family: "BrandonGrotesque";
-  font-weight: 500;
+  margin-top: calc(80px * var(--full-to-relative));
+  border-top: 1px solid var(--grey-23);
+  padding-top: calc(40px * var(--full-to-relative));
 }
 
 .step-stat {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  flex: 1;
 }
 
 .step-stat-data {
-  margin-bottom: calc(22px * var(--full-to-relative));
   color: var(--theme-color);
-  font-size: calc(70px * var(--full-to-relative));
-  line-height: calc(70px * var(--full-to-relative));
+  font-family: "Outfit", sans-serif;
+  font-weight: 700;
+  font-size: calc(60px * var(--full-to-relative));
+  margin-bottom: 4px;
 }
 
 .step-stat-description {
   text-transform: uppercase;
   color: var(--grey-15);
-  font-size: calc(30px * var(--full-to-relative));
-  line-height: calc(30px * var(--full-to-relative));
+  font-family: "Outfit", sans-serif;
+  font-weight: 500;
+  font-size: calc(24px * var(--full-to-relative));
+  letter-spacing: 0.05em;
 }
 
 .step-description {
   color: var(--grey-9);
-  font-size: calc(35px * var(--full-to-relative));
-  margin-top: calc(100px * var(--full-to-relative));
+  font-size: calc(32px * var(--full-to-relative));
+  line-height: 1.6;
+  margin-top: calc(60px * var(--full-to-relative));
   white-space: pre-wrap;
+  text-align: justify;
 }
 
 .photo-columns {
@@ -215,7 +207,8 @@ html, body {
   justify-content: center;
   align-items: center;
   height: calc(100vh - 40px);
-  gap: 20px;
+  gap: 30px;
+  padding: 30px;
 }
 
 .photo-column {
@@ -224,62 +217,49 @@ html, body {
   justify-content: center;
   height: 100%;
   width: 100%;
-  gap: 20px;
+  gap: 30px;
 }
 
 .photo-container {
   position: relative;
-  width: auto;
-  height: 100%;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: auto 100%;
-}
-
-.photo-index {
-  position: absolute;
-  bottom: 30px;
-  left: 50%;
-  transform: translate(-50%, 0);
-  font-size: 40px;
-  font-family: "BrandonGrotesque";
-  font-weight: 500;
-  color: red;
-}
-
-@media print {
-  .photo-index {
-    display: none;
-  }
-}
-
-.photo {
   width: 100%;
-  height: auto;
+  height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
 }
 
-.break-before {
-  page-break-before: always;
+.photo-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .break-after {
-  padding: 20px;
   page-break-after: always;
-  border: dashed 5px red;
-  margin-bottom: 10px;
-}
-
-.break-after:nth-child(odd) {
-  padding-left: 80px;
-}
-
-.break-after:nth-child(even) {
-  padding-right: 80px;
+  background: white;
+  margin-bottom: 40px;
+  border: 1px solid #eee;
 }
 
 @media print {
-  .break-after {
-    border: none;
-    margin-bottom: 0;
+  body {
+    background-color: white;
   }
+  .break-after {
+    margin-bottom: 0;
+    border: none;
+  }
+  .step-with-photo {
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    height: 100vh;
+  }
+}
+
+/* Custom font placeholder if BrandonGrotesque is not available */
+@font-face {
+  font-family: 'Outfit';
+  src: url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
 }

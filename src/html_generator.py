@@ -1,18 +1,20 @@
-from pathlib import Path
 import shutil
+import logging
+from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
+import config
 from models.trip import Trip
+
+logger = logging.getLogger(__name__)
 
 
 class HTMLGenerator:
-    CURRENT_FILE_PATH = Path(__file__).resolve().parent
-    TEMPLATE_VARS = {"project_root": CURRENT_FILE_PATH.parent}
+    TEMPLATE_VARS = {"project_root": config.PROJECT_ROOT}
 
     def __init__(self):
-
         env = Environment(
-            loader=FileSystemLoader(self.CURRENT_FILE_PATH.joinpath("templates")),
+            loader=FileSystemLoader(config.SRC_PATH.joinpath("templates")),
             autoescape=select_autoescape(),
         )
         self.template = env.get_template("index.html")

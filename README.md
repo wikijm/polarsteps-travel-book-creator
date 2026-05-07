@@ -3,6 +3,12 @@
 
 A Python tool that takes your Polarsteps data export and converts it into a beautifully formatted PDF, ready to be printed as a travel book. Perfect for preserving your travel memories!
 
+### ✨ Key Features
+- **Premium Design**: Modern typography (Outfit font) and refined layout for a professional look.
+- **Progress Tracking**: Real-time progress bars for data processing, map downloads, and elevation fetching.
+- **Robustness**: Improved error handling and centralized configuration.
+- **Smart Layout**: Automatic photo arrangement and map generation for each trip step.
+
 ## Setup Instructions
 
 Ensure you are using Python version `3.13.x`. You can check your Python version with:

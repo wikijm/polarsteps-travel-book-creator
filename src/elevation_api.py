@@ -5,15 +5,18 @@ import requests
 import time
 import json
 import os
+import logging
+import config
 
 CACHE_FILE_NAME = "elevation_cache.json"
+logger = logging.getLogger(__name__)
 
 
 class ElevationAPI:
     def __init__(self, cache_directory: Path) -> None:
-        self.api_url: str = "https://api.opentopodata.org/v1/aster30m"
-        self.max_locations_per_request: int = 100
-        self.max_calls_per_day: int = 1000
+        self.api_url: str = config.ELEVATION_API_URL
+        self.max_locations_per_request: int = config.MAX_LOCATIONS_PER_REQUEST
+        self.max_calls_per_day: int = config.MAX_CALLS_PER_DAY
         self.calls_made: int = 0
         self.cache_file = cache_directory.joinpath(CACHE_FILE_NAME)
 
@@ -29,15 +32,15 @@ class ElevationAPI:
         :param locations: A list of tuples where each tuple contains (latitude, longitude)
         :return: A list of elevations corresponding to each location
         """
-        all_elevations: List[Optional[float]] = []
+        results: Dict[str, Optional[float]] = {}
         locations_to_query: List[Tuple[float, float]] = []
 
-        # First, check if locations are in cache
+        # Identify which locations need to be queried
         for loc in locations:
             lat, lon = loc
             key: str = f"{lat},{lon}"
             if key in self.cache:
-                all_elevations.append(self.cache[key])
+                results[key] = self.cache[key]
             else:
                 locations_to_query.append(loc)
 
@@ -48,7 +51,7 @@ class ElevationAPI:
 
         for batch in location_batches:
             if self.calls_made >= self.max_calls_per_day:
-                print("Reached the maximum number of API calls for today.")
+                logger.warning("Reached the maximum number of API calls for today.")
                 break
 
             # Prepare the locations string for the API request
@@ -64,29 +67,28 @@ class ElevationAPI:
                     for loc, result in zip(batch, data["results"]):
                         lat, lon = loc
                         elevation: Optional[float] = result.get("elevation")
-                        all_elevations.append(elevation)
-
-                        # Cache the result
                         key = f"{lat},{lon}"
+                        results[key] = elevation
                         self.cache[key] = elevation
                 else:
-                    all_elevations.extend([None] * len(batch))
+                    for loc in batch:
+                        lat, lon = loc
+                        results[f"{lat},{lon}"] = None
 
                 self.calls_made += 1
-
-                # Respect the API rate limit (1 call per second)
                 time.sleep(1)
 
             except requests.exceptions.RequestException as e:
-                print(f"An error occurred: {e}")
-                all_elevations.extend(
-                    [None] * len(batch)
-                )  # Return None for each location in case of an error
+                logger.error(f"An error occurred: {e}")
+                for loc in batch:
+                    lat, lon = loc
+                    results[f"{lat},{lon}"] = None
 
         # Save updated cache to file
         self._save_cache()
 
-        return all_elevations
+        # Reconstruct the list in the original order
+        return [results.get(f"{loc[0]},{loc[1]}") for loc in locations]
 
     def _chunks(
         self, data: List[Tuple[float, float]], size: int
